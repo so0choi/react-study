@@ -4,7 +4,10 @@ import "./index.css";
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button
+      className={props.clicked ? "square clicked" : "square"}
+      onClick={props.onClick}
+    >
       {props.value}
     </button>
   );
@@ -14,32 +17,27 @@ class Board extends React.Component {
   renderSquare(i) {
     return (
       <Square
+        clicked={this.props.winner && i in this.props.winner ? true : false}
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
       />
     );
   }
 
+  renderBoard() {
+    let rows = [];
+    for (let i = 0; i < 3; i++) {
+      let squares = [];
+      for (let j = 0; j < 3; j++) {
+        squares.push(this.renderSquare(i * 3 + j));
+      }
+      rows.push(<div className="board-row">{squares}</div>);
+    }
+    return rows;
+  }
+
   render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
+    return <div>{this.renderBoard()}</div>;
   }
 }
 
@@ -88,6 +86,7 @@ class Game extends React.Component {
       ]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
+      clicked: i,
     });
   }
 
@@ -105,10 +104,18 @@ class Game extends React.Component {
 
     const moves = history.map((step, move) => {
       const desc = move ? "Go to move #" + move : "Go to game start";
+
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>
-            {desc} [{step.position[0]}, {step.position[1]}]
+            {desc}
+            {move !== 0 && (
+              <>
+                {" "}
+                [<span>{step.position[0]}</span>,{" "}
+                <span>{step.position[1]}</span>]
+              </>
+            )}
           </button>
         </li>
       );
@@ -116,15 +123,17 @@ class Game extends React.Component {
 
     let status;
     if (winner) {
-      status = "Winner: " + current[winner[0]];
+      status = "Winner: " + current.squares[winner[0]];
     } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+      if (this.state.stepNumber === 9) status = "DRAW";
+      else status = "Next player: " + (this.state.xIsNext ? "X" : "O");
     }
 
     return (
       <div className="game">
         <div className="game-board">
           <Board
+            winner={winner}
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
           />
@@ -154,7 +163,6 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      console.log(a, b, c);
       return [a, b, c];
     }
   }
@@ -165,7 +173,7 @@ function calculateWinner(squares) {
 
 // 이동 기록 목록에서 특정 형식(행, 열)으로 각 이동의 위치를 표시해주세요. - O
 // 이동 목록에서 현재 선택된 아이템을 굵게 표시해주세요.
-// 사각형들을 만들 때 하드코딩 대신에 두 개의 반복문을 사용하도록 Board를 다시 작성해주세요.
+// 사각형들을 만들 때 하드코딩 대신에 두 개의 반복문을 사용하도록 Board를 다시 작성해주세요. - O
 // 오름차순이나 내림차순으로 이동을 정렬하도록 토글 버튼을 추가해주세요.
 // 승자가 정해지면 승부의 원인이 된 세 개의 사각형을 강조해주세요.
-// 승자가 없는 경우 무승부라는 메시지를 표시해주세요.
+// 승자가 없는 경우 무승부라는 메시지를 표시해주세요. - o
