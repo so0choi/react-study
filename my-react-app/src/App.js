@@ -1,19 +1,13 @@
-import Hello from "./Hello";
 import "./App.css";
-import Wrapper from "./Wrapper";
+
+import Counter from "./Counter";
 
 function App() {
   return (
     <>
-      <Wrapper>
-        <Hello name="React" color="red" isSpecial />
-        <Hello color="blue" />
-      </Wrapper>
+      <Counter></Counter>
     </>
   );
 }
 
-Hello.defaultProps = {
-  name: "No name",
-};
 export default App;
